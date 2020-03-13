@@ -7,19 +7,16 @@ class Puzzle{
 
 	constructor(id, boardSize){
 		this.id = id;
-		this.loadImage().then(image => {
-			this.image = {size: image.size, uri: image.uri};
-			this.block = {size: Math.round(this.image.size / boardSize), qty: this.square(boardSize)}
-			this.board = this.getBoard(boardSize, this.image);
-		});
+		this.image = this.getImage();
+		this.block = {size: Math.round(this.image.size / boardSize), qty: this.square(boardSize)}
+		this.board = this.getBoard(boardSize, this.image);
 	}
 
-	async loadImage(){
+	getImage(){
 		const puzzle = document.getElementById(this.id);
-		const img = puzzle.querySelector(".puzzleImg");
-		const width = img.clientWidth;
-		const uri = img.src;
-		return {uri: uri,size: width};
+		const img = puzzle.querySelector("img");
+		const image = {uri: img.src, size:img.clientWidth};
+		return image;
 	}
 
 	getBlockPositions(image, blockSize){
@@ -214,11 +211,9 @@ class Puzzle{
 		}, 500);
 	}
 
-	async init(){
-		this.loadImage().then(() => {
-			this.createPuzzle();
-			this.trackGameClicks();
-			this.checkIfWin();
-		});
+	init(){
+		this.createPuzzle();
+		this.trackGameClicks();
+		this.checkIfWin();
 	}
 }

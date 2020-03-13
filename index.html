@@ -19,6 +19,7 @@
 <script src="./js/puzzle.js"></script>
 
 <script>
+window.onload = function() {
 	let id = 'containerPuzzle';
 	let boardSize = 3;
 	let puzzle = new Puzzle(id, boardSize);
@@ -38,4 +39,6 @@
 	boardSize = 6;
 	puzzle = new Puzzle(id, boardSize);
 	puzzle.init();
+};
+
 </script>
