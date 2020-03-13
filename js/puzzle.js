@@ -2,28 +2,38 @@ class Puzzle{
 	id;
 	block;
 	board;
-	imageSize;
+	image;
 	emptyPosition;
 
-	constructor(id, boardSize, imageSize){
+	constructor(id, boardSize){
 		this.id = id;
-		this.block = {size: Math.round(imageSize / boardSize), qty: this.square(boardSize)}
-		this.board = this.getBoard(boardSize, imageSize);
-		this.imageSize = imageSize;
+		this.loadImage().then(image => {
+			this.image = {size: image.size, uri: image.uri};
+			this.block = {size: Math.round(this.image.size / boardSize), qty: this.square(boardSize)}
+			this.board = this.getBoard(boardSize, this.image);
+		});
 	}
 
-	getBlockPositions(imageSize, blockSize){
+	async loadImage(){
+		const puzzle = document.getElementById(this.id);
+		const img = puzzle.querySelector(".puzzleImg");
+		const width = img.clientWidth;
+		const uri = img.src;
+		return {uri: uri,size: width};
+	}
+
+	getBlockPositions(image, blockSize){
 		let blockPositions = [];
 		let i = 0;
-		while (i < imageSize) {
+		while (i < image.size) {
 			blockPositions.push(i);
 			i = blockSize + i;
 		}	
 		return blockPositions;
 	}
 
-	getBoard(size, imageSize){
-		const pieces = this.organizePieces(size, imageSize);
+	getBoard(size, image){
+		const pieces = this.organizePieces(size, image);
 		const structure = this.disociateImages(pieces.positions, pieces.structure);
 		return structure;
 	}
@@ -37,10 +47,10 @@ class Puzzle{
 		return empty;
 	}
 
-	organizePieces(size, imageSize){
+	organizePieces(size, image){
 		const randomEmpty = this.randomNumber(0, this.block.qty);
 		let blockSize = this.block.size;
-		let blockPositions = this.getBlockPositions(imageSize, blockSize);
+		let blockPositions = this.getBlockPositions(image, blockSize);
 		let positions = [];
 		let structure = [];
 		let order = 0;
@@ -75,7 +85,7 @@ class Puzzle{
 
 	createBackground(size, container){
 		const backgroundTransparentDiv = document.createElement('div');
-		backgroundTransparentDiv.style.backgroundImage = 'url("images/monks.jpg")';
+		backgroundTransparentDiv.style.backgroundImage = 'url('+ this.image.uri +')';
 		backgroundTransparentDiv.style.width = size;
 		backgroundTransparentDiv.style.height = size;
 		backgroundTransparentDiv.style.opacity = '0.2';
@@ -99,6 +109,8 @@ class Puzzle{
 			iDiv.setAttribute('data-correct-order-left', element.leftBackground);
 			iDiv.style.backgroundPositionY = '-' + element.topBackground + 'px';
 			iDiv.style.backgroundPositionX = '-' + element.leftBackground + 'px';
+			iDiv.style.backgroundImage = 'url('+ this.image.uri +')';
+
 			container.appendChild(iDiv);
 			iDiv.appendChild(iSpan);
 		});
@@ -173,7 +185,7 @@ class Puzzle{
 	}
 
 	createPuzzle(){
-		const sizeFixed = this.imageSize + 2;
+		const sizeFixed = this.image.size + 2;
 		const container = this.createContainer(sizeFixed);
 		this.createBackground(sizeFixed, container);
 		this.createPieces(container);
@@ -202,9 +214,11 @@ class Puzzle{
 		}, 500);
 	}
 
-	init(){
-		this.createPuzzle();
-		this.trackGameClicks();
-		this.checkIfWin();
+	async init(){
+		this.loadImage().then(() => {
+			this.createPuzzle();
+			this.trackGameClicks();
+			this.checkIfWin();
+		});
 	}
 }

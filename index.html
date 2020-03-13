@@ -4,16 +4,16 @@
 
 <body>
 	<h1>Puzzle 1</h1>
-	<div id="containerPuzzle"></div>
+	<div id="containerPuzzle"><img class="puzzleImg" src="images/test2.jpg" /></div>
 
 	<h1>Puzzle 2</h1>
-	<div id="containerPuzzle2"></div>
+	<div id="containerPuzzle2"><img class="puzzleImg" src="images/monks.jpg" /></div>
 
 	<h1>Puzzle 3</h1>
-	<div id="containerPuzzle3"></div>
+	<div id="containerPuzzle3"><img class="puzzleImg" src="images/test1.jpg" /></div>
 
 	<h1>Puzzle 4</h1>
-	<div id="containerPuzzle4"></div>
+	<div id="containerPuzzle4"><img class="puzzleImg" src="images/test0.jpg" /></div>
 </body>
 
 <script src="./js/puzzle.js"></script>
@@ -21,28 +21,21 @@
 <script>
 	let id = 'containerPuzzle';
 	let boardSize = 3;
-	let imageSize = 500;
-	let puzzle = new Puzzle(id, boardSize, imageSize);
+	let puzzle = new Puzzle(id, boardSize);
 	puzzle.init();
 
 	id = 'containerPuzzle2';
 	boardSize = 4;
-	imageSize = 500;
-	puzzle = new Puzzle(id, boardSize, imageSize);
+	puzzle = new Puzzle(id, boardSize);
 	puzzle.init();
 
 	id = 'containerPuzzle3';
 	boardSize = 5;
-	imageSize = 500;
-	puzzle = new Puzzle(id, boardSize, imageSize);
+	puzzle = new Puzzle(id, boardSize);
 	puzzle.init();
 
 	id = 'containerPuzzle4';
 	boardSize = 6;
-	imageSize = 500;
-	puzzle = new Puzzle(id, boardSize, imageSize);
+	puzzle = new Puzzle(id, boardSize);
 	puzzle.init();
-
-
-
 </script>
