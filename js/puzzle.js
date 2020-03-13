@@ -1,72 +1,80 @@
 class Puzzle{
 	id;
-	pieceBlock;
+	block;
+	board;
 	imageSize;
-	blockStructure;
-	blocksQty;
 	emptyPosition;
 
 	constructor(id, boardSize, imageSize){
 		this.id = id;
-		let size = imageSize / boardSize;
-		this.pieceBlock =  Math.round(size);
+		this.block = {size: Math.round(imageSize / boardSize), qty: this.square(boardSize)}
+		this.board = this.getBoard(boardSize, imageSize);
 		this.imageSize = imageSize;
-		this.blocksQty = this.sizeQube(boardSize);
-		this.blockStructure = this.getBlockStructure(boardSize, imageSize);
 	}
 
-	getBlockStructure(size, imageSize){
-		let blockStructure = [];
-		let fBlockStructure = [];
-		let positions = [];
+	getBlockPositions(imageSize, blockSize){
+		let blockPositions = [];
 		let i = 0;
-		let y = 0;
-		let order = 0;
-		let pieceBlock = this.pieceBlock;
-		let randomEmpty = this.getRandomInt(0, this.blocksQty);
-		let empty;
-
 		while (i < imageSize) {
-			blockStructure.push(i);
-			i = pieceBlock + i;
-		}
-		
-		for (i = 0; i < size; i++) {
-			for (y = 0; y < size; y++) {
-				empty = false;
-				if(order === randomEmpty){
-					empty = true;
-					this.emptyPosition = {order:order};
-				}
+			blockPositions.push(i);
+			i = blockSize + i;
+		}	
+		return blockPositions;
+	}
 
-				positions.push({top:blockStructure[i], left:blockStructure[y], order: order});
-				fBlockStructure.push({
-					top:blockStructure[i], 
-					left:blockStructure[y], 
-					size: pieceBlock,
-					empty: empty,
-					topBackground: 0,
-					leftBackground: 0
+	getBoard(size, imageSize){
+		const pieces = this.organizePieces(size, imageSize);
+		const structure = this.disociateImages(pieces.positions, pieces.structure);
+		return structure;
+	}
+
+	getEmptyPosition(order, randomEmpty){
+		let empty = false;
+		if(order === randomEmpty){
+			this.emptyPosition = {order:order};
+			empty = true;
+		}
+		return empty;
+	}
+
+	organizePieces(size, imageSize){
+		const randomEmpty = this.randomNumber(0, this.block.qty);
+		let blockSize = this.block.size;
+		let blockPositions = this.getBlockPositions(imageSize, blockSize);
+		let positions = [];
+		let structure = [];
+		let order = 0;
+
+		for (let i = 0; i < size; i++) {
+			for (let y = 0; y < size; y++) {
+				positions.push({top:blockPositions[i], left:blockPositions[y], order: order});
+				structure.push({
+					top:blockPositions[i], 
+					left:blockPositions[y], 
+					size: blockSize,
+					empty: this.getEmptyPosition(order, randomEmpty)
 				});
 				order++;
 			}
-		}
+		}		
+		return {positions: positions, structure: structure}
+	}
 
+	disociateImages(positions, structure){
 		this.shuffle(positions).forEach((element, s) => {
-			fBlockStructure[s].topBackground = element.top;
-			fBlockStructure[s].leftBackground = element.left;
-			fBlockStructure[s].order = element.order;
-			if(fBlockStructure[s].empty){
-				this.emptyPosition.top = fBlockStructure[s].top;
-				this.emptyPosition.left = fBlockStructure[s].left; 
+			structure[s].topBackground = element.top;
+			structure[s].leftBackground = element.left;
+			structure[s].order = element.order;
+			if(structure[s].empty){
+				this.emptyPosition.top = structure[s].top;
+				this.emptyPosition.left = structure[s].left; 
 			}
 		});
-
-		return fBlockStructure;
+		return structure;
 	}
 
 	createBackground(size, container){
-		let backgroundTransparentDiv = document.createElement('div');
+		const backgroundTransparentDiv = document.createElement('div');
 		backgroundTransparentDiv.style.backgroundImage = 'url("images/monks.jpg")';
 		backgroundTransparentDiv.style.width = size;
 		backgroundTransparentDiv.style.height = size;
@@ -74,121 +82,129 @@ class Puzzle{
 		container.appendChild(backgroundTransparentDiv);
 	}
 
-	createMiniBlocks(container){
-		this.blockStructure.forEach((element, i) => {
-			if(!element.empty){
-				let iDiv = document.createElement('div');
-				let iSpan = document.createElement('span');
-				iSpan.textContent = element.order;
-
-				iDiv.className = 'puzzle piece'+i;
-				iDiv.style.width = element.size; 
-				iDiv.style.height = element.size; 
-				iDiv.style.top = element.top; 
-				iDiv.style.left = element.left; 
-				iDiv.setAttribute('data-correct-order-top', element.topBackground);
-				iDiv.setAttribute('data-correct-order-left', element.leftBackground);
-				iDiv.style.backgroundPositionY = '-' + element.topBackground + 'px';
-				iDiv.style.backgroundPositionX = '-' + element.leftBackground + 'px';
-				container.appendChild(iDiv);
-				iDiv.appendChild(iSpan);
+	createPieces(container){
+		this.board.forEach((element, i) => {
+			if(element.empty){
+				return;
 			}
+			const iDiv = document.createElement('div');
+			const iSpan = document.createElement('span');
+			iSpan.textContent = element.order;
+			iDiv.className = 'piece piece'+i;
+			iDiv.style.width = element.size; 
+			iDiv.style.height = element.size; 
+			iDiv.style.top = element.top; 
+			iDiv.style.left = element.left; 
+			iDiv.setAttribute('data-correct-order-top', element.topBackground);
+			iDiv.setAttribute('data-correct-order-left', element.leftBackground);
+			iDiv.style.backgroundPositionY = '-' + element.topBackground + 'px';
+			iDiv.style.backgroundPositionX = '-' + element.leftBackground + 'px';
+			container.appendChild(iDiv);
+			iDiv.appendChild(iSpan);
 		});
 	}
 
-	createPuzzleBlock(){
-		let container = document.getElementById(this.id);
-		let sizeFixed = this.imageSize + 2;
+	createContainer(sizeFixed	){
+		const container = document.getElementById(this.id);
 		container.style.position = 'relative';
 		container.style.width = sizeFixed;
 		container.style.height = sizeFixed;
 		container.style.backgroundColor = '#445';
-
-		this.createBackground(sizeFixed, container);
-		this.createMiniBlocks(container);
+		container.style.margin = '20px';
+		return container;
 	}
 
-	shuffle(array) {
-		var currentIndex = array.length, temporaryValue, randomIndex;
+	shuffle(positions) {
+		let currentIndex = positions.length, temporaryValue, randomIndex;
 		while (0 !== currentIndex) {
 			randomIndex = Math.floor(Math.random() * currentIndex);
 			currentIndex -= 1;
 	
-			temporaryValue = array[currentIndex];
-			array[currentIndex] = array[randomIndex];
-			array[randomIndex] = temporaryValue;
+			temporaryValue = positions[currentIndex];
+			positions[currentIndex] = positions[randomIndex];
+			positions[randomIndex] = temporaryValue;
 		}
-		return array;
+		return positions;
 	}
 
-	getRandomInt(min, max){
+	randomNumber(min, max){
 		min = Math.ceil(min);
 		max = Math.floor(max);
 		return Math.floor(Math.random() * (max - min)) + min;
 	}
 
-	sizeQube(size){
+	square(size){
 		return size * size;
 	}
 
-	move(e) {
-		let leftPosition = e.target.offsetLeft;
-		let topPosition = e.target.offsetTop;
-		this.canMove(e, leftPosition, topPosition);
-		this.win();
+	tryMove(e) {
+		const leftPosition = e.target.offsetLeft;
+		const topPosition = e.target.offsetTop;
+		this.checkIfCanMove(e, leftPosition, topPosition);
+		this.checkIfWin();
 	}
 
-	win(){
-		setTimeout(function () {
-			let puzzle = document.getElementById(this.id);
-			let puzzlePiece = puzzle.getElementsByClassName("puzzle");
-
-			for (var i = 0; i < puzzlePiece.length; i++) {
-				if(puzzlePiece[i].offsetTop !== parseInt(puzzlePiece[i].getAttribute('data-correct-order-top'))
-				|| puzzlePiece[i].offsetLeft !== parseInt(puzzlePiece[i].getAttribute('data-correct-order-left'))
-				){
-					return false;
-				}
-			}
-
-			alert('WIN');
-		}, 500);
-
-	}
-
-	canMove(e, leftPosition, topPosition){
-		let p1 = leftPosition + this.pieceBlock;
-		let p2 = leftPosition - this.pieceBlock;
-		let p3 = topPosition + this.pieceBlock;
-		let p4 = topPosition - this.pieceBlock;
+	checkIfCanMove(e, leftPosition, topPosition){
+		const p1 = leftPosition + this.block.size;
+		const p2 = leftPosition - this.block.size;
+		const p3 = topPosition + this.block.size;
+		const p4 = topPosition - this.block.size;
 	
 		if(p4 === this.emptyPosition.top && leftPosition === this.emptyPosition.left 
 		|| p3 === this.emptyPosition.top && leftPosition === this.emptyPosition.left
 		|| p2 === this.emptyPosition.left && topPosition === this.emptyPosition.top
 		|| p1 === this.emptyPosition.left && topPosition === this.emptyPosition.top
 		){
-			e.target.style.left = this.emptyPosition.left;
-			e.target.style.top = this.emptyPosition.top;
-			this.emptyPosition.left = leftPosition;
-			this.emptyPosition.top = topPosition;
+			this.move(e, leftPosition, topPosition);
 		}
 	}
 
-	create(){
-		this.createPuzzleBlock();
-		let puzzle = document.getElementById(this.id);
-		let puzzlePiece = puzzle.getElementsByClassName("puzzle");
-		for (var i = 0; i < puzzlePiece.length; i++) {
-			puzzlePiece[i].addEventListener('click', this.move.bind(this));
-		}
-		this.win();
+	move(e, leftPosition, topPosition){
+		e.target.style.left = this.emptyPosition.left;
+		e.target.style.top = this.emptyPosition.top;
+		this.emptyPosition.left = leftPosition;
+		this.emptyPosition.top = topPosition;
 	}
 
+	getPieces(){
+		const puzzle = document.getElementById(this.id);
+		const puzzlePieces = puzzle.getElementsByClassName("piece");
+		return puzzlePieces;
+	}
+
+	createPuzzle(){
+		const sizeFixed = this.imageSize + 2;
+		const container = this.createContainer(sizeFixed);
+		this.createBackground(sizeFixed, container);
+		this.createPieces(container);
+	}
+
+	trackGameClicks(){
+		const puzzlePieces = this.getPieces();
+		for (var i = 0; i < puzzlePieces.length; i++) {
+			puzzlePieces[i].addEventListener('click', this.tryMove.bind(this));
+		}
+	}
+
+	checkIfWin(){
+		const puzzle = document.getElementById(this.id);
+		const puzzlePieces = this.getPieces();
+		setTimeout(function () {
+			for (let i = 0; i < puzzlePieces.length; i++) {
+				if(puzzlePieces[i].offsetTop !== parseInt(puzzlePieces[i].getAttribute('data-correct-order-top'))
+				|| puzzlePieces[i].offsetLeft !== parseInt(puzzlePieces[i].getAttribute('data-correct-order-left'))
+				){
+					return;
+				}
+			}
+			puzzle.classList.add("donePuzzle");
+			alert('WIN');
+		}, 500);
+	}
+
+	init(){
+		this.createPuzzle();
+		this.trackGameClicks();
+		this.checkIfWin();
+	}
 }
-
-var id = 'containerPuzzle';
-var boardSize = 3;
-var imageSize = 500;
-let puzzle = new Puzzle(id, boardSize, imageSize);
-
-puzzle.create();
