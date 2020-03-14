@@ -1,5 +1,7 @@
 /* General */
-.piece {float: left; position: absolute; transition: 0.3s; border: 1px solid white;}
-.piece span {float: right; margin-right: 10px; margin-top: 10px; color: white; font-weight: bold; background: #445; padding: 4px; font-family: arial; font-size: 10px;}
+body{font-family: arial;}
+.piece{float: left; position: absolute; transition: 0.3s; border: 0.3px solid white;}
+.piece span{float: right; margin-right: 10px; margin-top: 10px; color: white; font-weight: bold; background: #445; padding: 4px; font-size: 10px;}
 .donePuzzle{pointer-events: none; opacity: 0.4;}
 .puzzleImg{visibility: hidden; z-index: -1; position: absolute;}
+.solveButton{}

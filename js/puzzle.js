@@ -1,5 +1,6 @@
 class Puzzle{
 	id;
+	puzzle;
 	block;
 	board;
 	image;
@@ -7,15 +8,16 @@ class Puzzle{
 
 	constructor(id, boardSize){
 		this.id = id;
+		this.puzzle = document.querySelector('#' + this.id + ' .puzzle');
 		this.image = this.getImage();
 		this.block = {size: Math.round(this.image.size / boardSize), qty: this.square(boardSize)}
 		this.board = this.getBoard(boardSize, this.image);
 	}
 
 	getImage(){
-		const puzzle = document.getElementById(this.id);
-		const img = puzzle.querySelector("img");
-		const image = {uri: img.src, size:img.clientWidth};
+		const puzzle = this.puzzle;
+		const img = puzzle.querySelector(".puzzleImg");
+		const image = {uri: img.src, size:img.width};
 		return image;
 	}
 
@@ -80,16 +82,16 @@ class Puzzle{
 		return structure;
 	}
 
-	createBackground(size, container){
+	createBackground(size, puzzleContainer){
 		const backgroundTransparentDiv = document.createElement('div');
 		backgroundTransparentDiv.style.backgroundImage = 'url('+ this.image.uri +')';
 		backgroundTransparentDiv.style.width = size;
 		backgroundTransparentDiv.style.height = size;
 		backgroundTransparentDiv.style.opacity = '0.2';
-		container.appendChild(backgroundTransparentDiv);
+		puzzleContainer.appendChild(backgroundTransparentDiv);
 	}
 
-	createPieces(container){
+	createPieces(puzzleContainer){
 		this.board.forEach((element, i) => {
 			if(element.empty){
 				return;
@@ -108,19 +110,19 @@ class Puzzle{
 			iDiv.style.backgroundPositionX = '-' + element.leftBackground + 'px';
 			iDiv.style.backgroundImage = 'url('+ this.image.uri +')';
 
-			container.appendChild(iDiv);
+			puzzleContainer.appendChild(iDiv);
 			iDiv.appendChild(iSpan);
 		});
 	}
 
-	createContainer(sizeFixed	){
-		const container = document.getElementById(this.id);
-		container.style.position = 'relative';
-		container.style.width = sizeFixed;
-		container.style.height = sizeFixed;
-		container.style.backgroundColor = '#445';
-		container.style.margin = '20px';
-		return container;
+	createPuzzleContainer(size){
+		const puzzle = this.puzzle;
+		puzzle.style.position = 'relative';
+		puzzle.style.width = size;
+		puzzle.style.height = size;
+		puzzle.style.backgroundColor = '#445';
+		puzzle.style.margin = '20px 0px';
+		return puzzle;
 	}
 
 	shuffle(positions) {
@@ -176,16 +178,38 @@ class Puzzle{
 	}
 
 	getPieces(){
-		const puzzle = document.getElementById(this.id);
+		const puzzle = this.puzzle;
 		const puzzlePieces = puzzle.getElementsByClassName("piece");
 		return puzzlePieces;
 	}
+	
+	getSolveButton(){
+		const generalContainer = document.getElementById(this.id);
+		const button = generalContainer.getElementsByClassName('solveButton');
+		return button;
+	}
+
+	createSolveButton(){
+		const generalContainer = document.getElementById(this.id);
+		const button = document.createElement('button');
+		button.textContent = 'Solve puzzle';
+		button.className = 'solveButton';
+		generalContainer.appendChild(button);
+	}
 
 	createPuzzle(){
-		const sizeFixed = this.image.size + 2;
-		const container = this.createContainer(sizeFixed);
-		this.createBackground(sizeFixed, container);
-		this.createPieces(container);
+		const size = this.image.size;
+		const puzzleContainer = this.createPuzzleContainer(size);
+		this.createBackground(size, puzzleContainer);
+		this.createPieces(puzzleContainer);
+		this.createSolveButton();
+	}
+
+	trackSolveButtonClick(){
+		const puzzlePieces = this.getPieces();
+		for (var i = 0; i < puzzlePieces.length; i++) {
+			puzzlePieces[i].addEventListener('click', this.tryMove.bind(this));
+		}
 	}
 
 	trackGameClicks(){
@@ -193,10 +217,13 @@ class Puzzle{
 		for (var i = 0; i < puzzlePieces.length; i++) {
 			puzzlePieces[i].addEventListener('click', this.tryMove.bind(this));
 		}
+
+		const button = this.getSolveButton();
+		button[0].addEventListener('click', this.solve.bind(this));
 	}
 
 	checkIfWin(){
-		const puzzle = document.getElementById(this.id);
+		const puzzle = this.puzzle;
 		const puzzlePieces = this.getPieces();
 		setTimeout(function () {
 			for (let i = 0; i < puzzlePieces.length; i++) {
@@ -209,6 +236,17 @@ class Puzzle{
 			puzzle.classList.add("donePuzzle");
 			alert('WIN');
 		}, 500);
+	}
+
+	solve(){
+		const puzzle = this.puzzle;
+		const puzzlePieces = this.getPieces();
+		for (let i = 0; i < puzzlePieces.length; i++) {
+			puzzlePieces[i].style.top = parseInt(puzzlePieces[i].getAttribute('data-correct-order-top'));
+			puzzlePieces[i].style.left = parseInt(puzzlePieces[i].getAttribute('data-correct-order-left'));
+		}	
+		puzzle.classList.add("donePuzzle");
+		alert('WIN');
 	}
 
 	init(){
