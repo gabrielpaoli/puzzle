@@ -35,23 +35,26 @@
 	window.onload = function() {
 		let id = 'containerPuzzle';
 		let boardSize = 3;
-		let puzzle = new Puzzle(id, boardSize);
+		let solvePuzzleButton = true;
+		let puzzle = new Puzzle(id, boardSize, solvePuzzleButton);
 		puzzle.init();
-		//puzzle.solve();
 
 		id = 'containerPuzzle2';
 		boardSize = 4;
-		puzzle = new Puzzle(id, boardSize);
+		solvePuzzleButton = true;
+		puzzle = new Puzzle(id, boardSize, solvePuzzleButton);
 		puzzle.init();
 
 		id = 'containerPuzzle3';
 		boardSize = 5;
-		puzzle = new Puzzle(id, boardSize);
+		solvePuzzleButton = true;
+		puzzle = new Puzzle(id, boardSize, solvePuzzleButton);
 		puzzle.init();
 
 		id = 'containerPuzzle4';
 		boardSize = 6;
-		puzzle = new Puzzle(id, boardSize);
+		solvePuzzleButton = true;
+		puzzle = new Puzzle(id, boardSize, solvePuzzleButton);
 		puzzle.init();
 	};
 </script>
