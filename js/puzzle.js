@@ -11,22 +11,27 @@ class Puzzle{
 	constructor(id, boardSize, solveButton = false){
 		this.id = id;
 		this.puzzle = document.querySelector('#' + this.id + ' .puzzle');
-		this.image = this.getImage();
-		this.block = {size: Math.round(this.image.size / boardSize), qty: this.square(boardSize)}
-		this.board = this.getBoard(boardSize, this.image);
+		this.image = this.setImage();
+		this.block = this.setBlock(this.image.size, boardSize);
+		this.board = this.setBoard(boardSize, this.image);
 		this.solveButton = solveButton;
 	}
 
 	//Method to get puzzle image
-	getImage(){
+	setImage(){
 		const puzzle = this.puzzle;
 		const img = puzzle.querySelector(".puzzleImg");
 		const image = {uri: img.src, size:img.width};
 		return image;
 	}
 
-	//Method to get puzzle board
-	getBoard(size, image){
+	//Method to set block
+	setBlock(imageSize, boardSize){
+		return {size: Math.round(imageSize / boardSize), qty: this.square(boardSize)}
+	}
+
+	//Method to set puzzle board
+	setBoard(size, image){
 		const pieces = this.organizePieces(size, image);
 		const structure = this.disociateImages(pieces.positions, pieces.structure);
 		return structure;
